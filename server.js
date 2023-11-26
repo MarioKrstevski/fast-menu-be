@@ -290,7 +290,24 @@ app.post("/publishMenu", async (req, res) => {
 
   return res.status(200).send("Menu is published");
 });
+app.get("/subdomainAvailability", async (req, res) => {
+  const subdomain = req.query.subdomain;
+  console.log("Checking for subdomain availability", subdomain);
+  const existingMenus = await redis.get("menus");
 
+  const menuArray = JSON.parse(existingMenus);
+
+  const menu = menuArray.find(
+    (menu) => menu.globalSettings.subdomain === subdomain
+  );
+
+  console.log("menu", menu);
+  if (menu) {
+    return res.status(201).send("taken");
+  } else {
+    return res.status(201).send("free");
+  }
+});
 app.get("/checkClientName", async (req, res) => {
   const clientName = req.query.clientName;
   const existingUsers = await redis.get("users");
