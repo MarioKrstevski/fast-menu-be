@@ -212,7 +212,7 @@ async function generateNewDefaultMenu(client) {
     return user.clientName === client;
   });
 
-  user.menus.push(newMenu.id);
+  user.menusIds.push(newMenu.id);
 
   await redis.set("users", JSON.stringify(userArray));
 }
@@ -229,15 +229,19 @@ async function getMenusForClient(client) {
 
   const existingMenus = await redis.get("menus");
 
+  if (!existingMenus) {
+    return [];
+  }
   // user should exist
   const menuArray = JSON.parse(existingMenus);
 
   let userMenus = [];
 
-  for (const menuId of user.menus) {
+  for (const menuId of user.menusIds) {
     const menu = menuArray.find((menu) => {
       return menu.id === menuId;
     });
+
     userMenus.push({
       isPublished: menu.isPublished,
       isPro: menu.isPro,
@@ -246,12 +250,11 @@ async function getMenusForClient(client) {
       id: menuId,
     });
   }
-
-  console.log("userMenus", userMenus);
   return userMenus;
 }
 app.get("/getMenus", async (req, res) => {
   const client = req.query.client;
+  console.log("Asked for menus for ", client);
   const menusForClient = await getMenusForClient(client);
   return res.status(200).json({
     success: true,
@@ -302,6 +305,22 @@ app.get("/checkClientName", async (req, res) => {
   } else {
     return res.status(201).send("Client name is free");
   }
+});
+app.post("/subscribeMenuToPro", async (req, res) => {
+  const { menuId } = req.body;
+
+  const existingMenus = await redis.get("menus");
+  const menuArray = JSON.parse(existingMenus);
+  const menu = menuArray.find((menu) => {
+    return menu.id === menuId;
+  });
+
+  menu.isPro = true;
+  await redis.set("menus", JSON.stringify(menuArray));
+
+  console.log("Menu subscribed to Pro", menuId);
+
+  return res.status(200).send("Menu upgraded to PRO");
 });
 app.get("/menuItems", async (req, res) => {
   const newLink = req.query.newLink;
@@ -393,6 +412,10 @@ app.post("/login", async (req, res) => {
       });
     }
 
+    const menus = await getMenusForClient(user.clientName);
+
+    user.menus = menus;
+
     // remove password to dont send it back for login info
     delete user.password;
     return res
@@ -442,6 +465,7 @@ app.post("/signup", async (req, res) => {
       password,
       email,
       clientName,
+      menusIds: [],
       menus: [],
       createdAt: Date.now().toString(),
       contactName: "New user",
