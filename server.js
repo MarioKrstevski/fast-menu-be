@@ -237,11 +237,16 @@ async function getMenusForClient(client) {
 
   let userMenus = [];
 
+  console.log("existing ids", user.menusIds);
   for (const menuId of user.menusIds) {
     const menu = menuArray.find((menu) => {
       return menu.id === menuId;
     });
-
+    if (!menu) {
+      console.log("menu", menu);
+      console.log("menuid no menu", menuId);
+    }
+    // if (menu) {
     userMenus.push({
       isPublished: menu.isPublished,
       isPro: menu.isPro,
@@ -249,9 +254,48 @@ async function getMenusForClient(client) {
       subdomain: menu.globalSettings.subdomain,
       id: menuId,
     });
+    // }
   }
   return userMenus;
 }
+app.delete("/deleteMenu", async (req, res) => {
+  console.log("res.params", req.query);
+  const menuId = req.query.menuId;
+
+  // menu must exist since we are deleting it
+  const existingMenus = await redis.get("menus");
+  let menuArray = JSON.parse(existingMenus);
+
+  const menu = menuArray.find((menu) => {
+    return menu.id === menuId;
+  });
+
+  if (menu) {
+    menuArray = menuArray.filter((menu) => {
+      return menu.id !== menuId;
+    });
+
+    console.log("mar", menuArray);
+
+    await redis.set("menus", JSON.stringify(menuArray));
+    console.log("Menu deleted");
+
+    const existingUsers = await redis.get("users");
+    const userArray = JSON.parse(existingUsers);
+    let user = userArray.find((user) => {
+      return user.menusIds.includes(menuId);
+    });
+
+    if (user) {
+      console.log("menu found");
+      user.menusIds = user.menusIds.filter((id) => id !== menuId);
+
+      await redis.set("users", JSON.stringify(userArray));
+    }
+
+    return res.status(200).send("Menu deleted");
+  }
+});
 app.get("/getMenus", async (req, res) => {
   const client = req.query.client;
   console.log("Asked for menus for ", client);
@@ -340,16 +384,15 @@ app.post("/subscribeMenuToPro", async (req, res) => {
   return res.status(200).send("Menu upgraded to PRO");
 });
 app.get("/menuItems", async (req, res) => {
-  const newLink = req.query.newLink;
+  const newSpreadSheetURL = req.query.newSpreadSheetURL;
+  console.log("Asked for menu items from link", newSpreadSheetURL);
 
-  // there should always be a menu since we clicked in dashboard edit button
-
-  const spreadsheetId = extractSpreadsheetId(newLink);
+  const spreadsheetId = extractSpreadsheetId(newSpreadSheetURL);
 
   const parser = new PublicGoogleSheetsParser(spreadsheetId);
 
-  parser.parse().then((menu) => {
-    res.json({ menu });
+  parser.parse().then((menuItems) => {
+    res.json({ menuItems });
   });
 });
 
@@ -393,7 +436,6 @@ app.get("/menu", async (req, res) => {
 
   parser.parse().then((menuItemsArray) => {
     res.json({
-      nesxt: "aa",
       menuItems: menuItemsArray,
       globalSettings: menu.globalSettings,
     });
@@ -429,9 +471,10 @@ app.post("/login", async (req, res) => {
       });
     }
 
-    const menus = await getMenusForClient(user.clientName);
+    // uncomment to remove milisecond blink for menus
 
-    user.menus = menus;
+    // const menus = await getMenusForClient(user.clientName);
+    // user.menus = menus;
 
     // remove password to dont send it back for login info
     delete user.password;
