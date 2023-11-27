@@ -10,6 +10,7 @@ import Redis from "ioredis";
 import whatsAppClient from "@green-api/whatsapp-api-client";
 import PublicGoogleSheetsParser from "public-google-sheets-parser";
 import { randomUUID } from "crypto";
+import jwt from "jsonwebtoken";
 
 // import csv from "csvtojson";
 
@@ -17,6 +18,16 @@ import { randomUUID } from "crypto";
 // const client = createClient();
 // client.on("error", (err) => console.log("Redis Client Error", err));
 // await client.connect();
+
+const secretKey = "mario";
+function generateAuthToken(userId) {
+  // Create a token with user ID as the payload
+  const token = jwt.sign({ userId }, secretKey, {
+    expiresIn: "1h",
+  }); // Expires in 1 hour
+
+  return token;
+}
 function generateShortID(length) {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -188,7 +199,7 @@ function generateDefaultGlobalSettings() {
   return defaultGlobalSettings;
 }
 
-function createNewMenu() {
+function createNewMenu(client = "") {
   return {
     isPro: false,
     isOnFreeTrial: false,
@@ -202,7 +213,7 @@ function createNewMenu() {
 async function generateAndAddNewDefaultMenu(client) {
   const existingMenus = await redis.get("menus");
 
-  const newMenu = createNewMenu();
+  const newMenu = createNewMenu(client);
 
   if (!existingMenus) {
     await redis.set("menus", JSON.stringify([newMenu]));
@@ -488,6 +499,8 @@ app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log("Trying to login", email, " ", password);
+
     // Retrieve users from Redis
     const existingUsers = await redis.get("users");
 
@@ -500,15 +513,18 @@ app.post("/login", async (req, res) => {
 
     const usersArray = JSON.parse(existingUsers);
 
+    console.log("usersArray", usersArray);
+
     // Check if a user with the provided email and password exists
     const user = usersArray.find(
       (u) => u.email === email && u.password === password
     );
+    console.log("user", user);
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "Login failed. Invalid email or password",
+        message: "Login failed. Invalid email/password",
       });
     }
 
@@ -518,11 +534,15 @@ app.post("/login", async (req, res) => {
     // user.menus = menus;
 
     // remove password to dont send it back for login info
+
     console.log("new user", user);
     delete user.password;
-    return res
-      .status(200)
-      .json({ success: true, message: "Login successful", user });
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      user,
+      token: generateAuthToken(user.id),
+    });
   } catch (error) {
     console.error("Error:", error);
     res
@@ -540,13 +560,16 @@ app.post("/updateUserInfo", async (req, res) => {
 
   user.contactName = contactName;
   user.contactNumber = contactNumber;
-  delete user.password;
 
   await redis.set("users", JSON.stringify(userArray));
 
-  res
-    .status(200)
-    .json({ success: true, message: "Login successful", user });
+  delete user.password;
+  res.status(200).json({
+    success: true,
+    message: "Login successful",
+    user,
+    token: generateAuthToken(user.id),
+  });
 });
 
 app.post("/signup", async (req, res) => {
@@ -663,16 +686,17 @@ app.post("/placeOrder", (req, res) => {
 async function createDemoMenusAndUsers() {
   const demoMenus = [];
   // published with default Menu 1
-  const demoMenu1 = createNewMenu();
+  const demoMenu1 = createNewMenu("demo");
   demoMenu1.isPublished = true;
   demoMenu1.isPro = true;
   demoMenu1.globalSettings.subdomain = "demo1";
+  demoMenu1.ordersEnabled = true;
   demoMenu1.globalSettings.card.buttonAction = "cart";
   demoMenu1.globalSettings.spreadSheetURL =
     "https://docs.google.com/spreadsheets/d/1i8s74vfPOwOyckvrwzxXBE7j_-0LPJR2rGRgyfwNDWU/edit#gid=0";
 
   // published with default Menu 2
-  const demoMenu2 = createNewMenu();
+  const demoMenu2 = createNewMenu("thedemo");
   demoMenu2.isPublished = true;
   demoMenu2.globalSettings.subdomain = "demo2";
 
@@ -681,7 +705,7 @@ async function createDemoMenusAndUsers() {
 
   // published with custom playing around shopping list
 
-  const demoMenu3 = createNewMenu();
+  const demoMenu3 = createNewMenu("thedemo");
   demoMenu3.globalSettings.subdomain = "demo3";
   demoMenu3.isPublished = true;
   demoMenu3.globalSettings.spreadSheetURL =
@@ -689,7 +713,7 @@ async function createDemoMenusAndUsers() {
 
   // published with custom electronics Neptun stuff
 
-  const demoMenu4 = createNewMenu();
+  const demoMenu4 = createNewMenu("thedemo");
   demoMenu4.isPublished = true;
   demoMenu4.globalSettings.subdomain = "demo4";
 
@@ -697,9 +721,9 @@ async function createDemoMenusAndUsers() {
     "https://docs.google.com/spreadsheets/d/14_N9Lk0APCXrA1lcCrCEeiE-KFkbho125bk8RWuu5T4/edit#gid=0";
 
   // demo 5 is not published
-  const demoMenu5 = createNewMenu();
+  const demoMenu5 = createNewMenu("thedemo");
   demoMenu5.isPublished = false;
-  demoMenu4.globalSettings.subdomain = "demo5";
+  demoMenu5.globalSettings.subdomain = "demo5";
   demoMenu5.globalSettings.spreadSheetURL =
     "https://docs.google.com/spreadsheets/d/14_N9Lk0APCXrA1lcCrCEeiE-KFkbho125bk8RWuu5T4/edit#gid=0";
 
@@ -725,8 +749,14 @@ async function createDemoMenusAndUsers() {
     id: generateShortID(6),
     password: "demo",
     email: "demo@demo.com",
-    clientName: "Demo User 1",
-    menusIds: [demoMenu1.id, demoMenu2.id, demoMenu3.id],
+    clientName: "thedemo",
+    menusIds: [
+      demoMenu1.id,
+      demoMenu2.id,
+      demoMenu3.id,
+      demoMenu4.id,
+      demoMenu5.id,
+    ],
     menus: [],
     createdAt: Date.now().toString(),
     contactName: "Demo User",
