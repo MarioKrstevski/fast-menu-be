@@ -95,6 +95,9 @@ const defaultItemsSpreadSheetURL =
 const defaultItems = [];
 
 // accept CSV file to use as a source for data
+app.get("/test", (req, res) => {
+  return res.status(200).send("hello");
+});
 app.post("/upload", upload.single("csvFile"), (req, res) => {
   const uploadedFile = req.file;
 
