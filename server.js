@@ -151,9 +151,10 @@ function generateDefaultGlobalSettings() {
     },
     menuDescription: "Menu Description",
     footer: {
+      removeFreeMenuTrademark: false,
       isShown: false,
       text: "",
-      backgroundColor: "#ffffff",
+      backgroundColor: "#E3E3E3",
       textColor: "#000000",
       isFacebookLinkShown: false,
       isInstagramLinkShown: false,
@@ -165,8 +166,8 @@ function generateDefaultGlobalSettings() {
       twitterURL: "",
     },
     theme: {
-      headerColor: "#DDE6E8",
-      backgroundColor: "#BDC3C8",
+      headerColor: "#FFFFFF",
+      backgroundColor: "#F0F0F0",
       font: "",
     },
     card: {
