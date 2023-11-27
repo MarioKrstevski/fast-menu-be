@@ -65,6 +65,10 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+const defaultItemsSpreadSheetURL =
+  "https://docs.google.com/spreadsheets/d/1i8s74vfPOwOyckvrwzxXBE7j_-0LPJR2rGRgyfwNDWU/edit#gid=0";
+const defaultItems = [];
+
 // accept CSV file to use as a source for data
 app.post("/upload", upload.single("csvFile"), (req, res) => {
   const uploadedFile = req.file;
@@ -124,9 +128,6 @@ app.post("/saveGlobalSettings", async (req, res) => {
 });
 
 // MENU
-const defaultItemsSpreadSheetURL =
-  "https://docs.google.com/spreadsheets/d/1i8s74vfPOwOyckvrwzxXBE7j_-0LPJR2rGRgyfwNDWU/edit#gid=0";
-const defaultItems = [];
 
 function generateDefaultGlobalSettings() {
   const defaultGlobalSettings = {
@@ -186,10 +187,9 @@ function generateDefaultGlobalSettings() {
 
   return defaultGlobalSettings;
 }
-async function generateNewDefaultMenu(client) {
-  const existingMenus = await redis.get("menus");
 
-  const newMenu = {
+function createNewMenu() {
+  return {
     isPro: false,
     isOnFreeTrial: false,
     isPublished: false,
@@ -197,6 +197,12 @@ async function generateNewDefaultMenu(client) {
     items: [...defaultItems],
     globalSettings: { ...generateDefaultGlobalSettings(), client },
   };
+}
+
+async function generateAndAddNewDefaultMenu(client) {
+  const existingMenus = await redis.get("menus");
+
+  const newMenu = createNewMenu();
 
   if (!existingMenus) {
     await redis.set("menus", JSON.stringify([newMenu]));
@@ -315,7 +321,7 @@ app.get("/getMenus", async (req, res) => {
 });
 app.get("/generateNewMenu", async (req, res) => {
   const client = req.query.client;
-  await generateNewDefaultMenu(client);
+  await generateAndAddNewDefaultMenu(client);
 
   const menusForClient = await getMenusForClient(client);
 
@@ -557,18 +563,18 @@ app.post("/signup", async (req, res) => {
     // Check if the user ID is already in use
     const existingUsers = await redis.get("users");
 
-    let usersArray = [];
+    let userArray = [];
     if (existingUsers) {
-      usersArray = JSON.parse(existingUsers);
+      userArray = JSON.parse(existingUsers);
 
       // Check if the generated user ID is already in use
-      while (usersArray.some((user) => user.id === userId)) {
+      while (userArray.some((user) => user.id === userId)) {
         userId = generateShortID(6); // Generate a new ID
       }
     }
 
     // Check if a user with the same email already exists
-    const existingUser = usersArray.find(
+    const existingUser = userArray.find(
       (user) => user.email === email
     );
 
@@ -654,6 +660,93 @@ app.post("/placeOrder", (req, res) => {
     });
 });
 
+async function createDemoMenusAndUsers() {
+  const demoMenus = [];
+  // published with default Menu 1
+  const demoMenu1 = createNewMenu();
+  demoMenu1.isPublished = true;
+  demoMenu1.isPro = true;
+  demoMenu1.globalSettings.subdomain = "demo1";
+  demoMenu1.globalSettings.card.buttonAction = "cart";
+  demoMenu1.globalSettings.spreadSheetURL =
+    "https://docs.google.com/spreadsheets/d/1i8s74vfPOwOyckvrwzxXBE7j_-0LPJR2rGRgyfwNDWU/edit#gid=0";
+
+  // published with default Menu 2
+  const demoMenu2 = createNewMenu();
+  demoMenu2.isPublished = true;
+  demoMenu2.globalSettings.subdomain = "demo2";
+
+  demoMenu2.globalSettings.spreadSheetURL =
+    "https://docs.google.com/spreadsheets/d/14_N9Lk0APCXrA1lcCrCEeiE-KFkbho125bk8RWuu5T4/edit#gid=0";
+
+  // published with custom playing around shopping list
+
+  const demoMenu3 = createNewMenu();
+  demoMenu3.globalSettings.subdomain = "demo3";
+  demoMenu3.isPublished = true;
+  demoMenu3.globalSettings.spreadSheetURL =
+    "https://docs.google.com/spreadsheets/d/14_N9Lk0APCXrA1lcCrCEeiE-KFkbho125bk8RWuu5T4/edit#gid=0";
+
+  // published with custom electronics Neptun stuff
+
+  const demoMenu4 = createNewMenu();
+  demoMenu4.isPublished = true;
+  demoMenu4.globalSettings.subdomain = "demo4";
+
+  demoMenu4.globalSettings.spreadSheetURL =
+    "https://docs.google.com/spreadsheets/d/14_N9Lk0APCXrA1lcCrCEeiE-KFkbho125bk8RWuu5T4/edit#gid=0";
+
+  // demo 5 is not published
+  const demoMenu5 = createNewMenu();
+  demoMenu5.isPublished = false;
+  demoMenu4.globalSettings.subdomain = "demo5";
+  demoMenu5.globalSettings.spreadSheetURL =
+    "https://docs.google.com/spreadsheets/d/14_N9Lk0APCXrA1lcCrCEeiE-KFkbho125bk8RWuu5T4/edit#gid=0";
+
+  demoMenus.push(demoMenu1);
+  demoMenus.push(demoMenu2);
+  demoMenus.push(demoMenu3);
+  demoMenus.push(demoMenu4);
+  demoMenus.push(demoMenu5);
+
+  const existingMenus = await redis.get("menus");
+  if (!existingMenus) {
+    await redis.set("menus", JSON.stringify(demoMenus));
+  } else {
+    let menuArray = JSON.parse(existingMenus);
+    await redis.set(
+      "menus",
+      JSON.stringify([...menuArray, demoMenus])
+    );
+  }
+
+  const demoUsers = [];
+  const demoUser1 = {
+    id: generateShortID(6),
+    password: "demo",
+    email: "demo@demo.com",
+    clientName: "Demo User 1",
+    menusIds: [demoMenu1.id, demoMenu2.id, demoMenu3.id],
+    menus: [],
+    createdAt: Date.now().toString(),
+    contactName: "Demo User",
+    contactNumber: "Demo Number",
+  };
+  demoUsers.push(demoUser1);
+  const existingUsers = await redis.get("users");
+  if (!existingUsers) {
+    await redis.set("users", JSON.stringify(demoUsers));
+  } else {
+    let userArray = JSON.parse(existingUsers);
+    await redis.set(
+      "users",
+      JSON.stringify([...userArray, demoUsers])
+    );
+  }
+
+  // Check if a user with the same email already exists
+}
+createDemoMenusAndUsers();
 app.listen(PORT, () => {
   console.log("Server is running on port " + PORT);
 });
