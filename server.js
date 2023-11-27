@@ -52,8 +52,22 @@ function generateRandomCode(length) {
   return code;
 }
 // Usage: Generate a 6-character short ID
+// const redisOptions = {
+//   host: 'your-redis-host',       // Replace with your Redis Labs host
+//   port: 12345,                    // Replace with your Redis Labs port
+//   password: 'your-redis-password', // Replace with your Redis Labs password
+// };
 
-const redis = new Redis();
+const redisOptions = {
+  password: "DZqdWxND92zzDU6ZorUUgS2JHifNfP4Y",
+  port: 11535,
+  host: "redis-11535.c300.eu-central-1-1.ec2.cloud.redislabs.com",
+  // socket: {
+  // },
+};
+// By default, it will connect to localhost:6379 if no args are passed
+// const redis = new Redis();
+const redis = new Redis(redisOptions);
 
 const PORT = process.env.PORT || 8000;
 
@@ -622,10 +636,10 @@ app.post("/signup", async (req, res) => {
     };
 
     console.log("new user created", newUser);
-    usersArray.push(newUser);
+    userArray.push(newUser);
 
     // Update the 'users' key in Redis
-    await redis.set("users", JSON.stringify(usersArray));
+    await redis.set("users", JSON.stringify(userArray));
 
     console.log("New user created");
     res.status(201).send("User registered successfully");
@@ -776,7 +790,7 @@ async function createDemoMenusAndUsers() {
 
   // Check if a user with the same email already exists
 }
-createDemoMenusAndUsers();
+// createDemoMenusAndUsers();
 app.listen(PORT, () => {
   console.log("Server is running on port " + PORT);
 });
