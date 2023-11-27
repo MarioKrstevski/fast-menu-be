@@ -138,6 +138,7 @@ function generateDefaultGlobalSettings() {
     client: "clientName",
     subdomain: "subdomain-" + generateRandomCode(4).toLowerCase(),
     logoURL: "",
+    websiteTitle: "",
     faviconURL: "",
     isNavbarFixed: false,
     hero: {
@@ -189,6 +190,7 @@ async function generateNewDefaultMenu(client) {
 
   const newMenu = {
     isPro: false,
+    isOnFreeTrial: false,
     isPublished: false,
     id: randomUUID(),
     items: [...defaultItems],
@@ -247,8 +249,13 @@ async function getMenusForClient(client) {
       console.log("menuid no menu", menuId);
     }
     // if (menu) {
+    let freeTrialValue = "";
+    if (Number(menu.isOnFreeTrial) >= new Date().getTime()) {
+      freeTrialValue = menu.isOnFreeTrial;
+    }
     userMenus.push({
       isPublished: menu.isPublished,
+      isOnFreeTrial: freeTrialValue,
       isPro: menu.isPro,
       menuName: menu.globalSettings.menuName,
       subdomain: menu.globalSettings.subdomain,
@@ -366,6 +373,33 @@ app.get("/checkClientName", async (req, res) => {
   } else {
     return res.status(201).send("Client name is free");
   }
+});
+
+function calculateTimestampForTomorrow() {
+  // Get the current date and time
+  const currentDate = new Date();
+  // Calculate the timestamp for 1 day from now (add 1 day worth of milliseconds)
+  const timestampForTomorrow =
+    currentDate.getTime() + 24 * 60 * 60 * 1000;
+  return timestampForTomorrow;
+}
+app.post("/enableFreeTrialForMenu", async (req, res) => {
+  const { menuId } = req.body;
+  const existingMenus = await redis.get("menus");
+  const menuArray = JSON.parse(existingMenus);
+  const menu = menuArray.find((menu) => {
+    return menu.id === menuId;
+  });
+
+  if (!menu.isOnFreeTrial) {
+    menu.isOnFreeTrial = calculateTimestampForTomorrow().toString();
+  }
+
+  await redis.set("menus", JSON.stringify(menuArray));
+
+  console.log("Menu subscribed to Free Trial", menuId);
+
+  return res.status(200).send("Menu upgraded to Free Trial");
 });
 app.post("/subscribeMenuToPro", async (req, res) => {
   const { menuId } = req.body;
