@@ -151,7 +151,7 @@ function generateDefaultGlobalSettings() {
     },
     menuDescription: "Menu Description",
     footer: {
-      removeFreeMenuTrademark: false,
+      isFreeMenuTrademarkShown: true,
       isShown: false,
       text: "",
       backgroundColor: "#E3E3E3",
