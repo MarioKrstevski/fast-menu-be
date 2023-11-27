@@ -512,6 +512,7 @@ app.post("/login", async (req, res) => {
     // user.menus = menus;
 
     // remove password to dont send it back for login info
+    console.log("new user", user);
     delete user.password;
     return res
       .status(200)
@@ -523,10 +524,34 @@ app.post("/login", async (req, res) => {
       .json({ success: false, message: "An error occurred" });
   }
 });
+app.post("/updateUserInfo", async (req, res) => {
+  const { contactName, contactNumber, email } = req.body;
+  console.log("req.body", req.body);
+
+  const existingUsers = await redis.get("users");
+  const userArray = JSON.parse(existingUsers);
+  const user = userArray.find((user) => user.email === email);
+
+  user.contactName = contactName;
+  user.contactNumber = contactNumber;
+  delete user.password;
+
+  await redis.set("users", JSON.stringify(userArray));
+
+  res
+    .status(200)
+    .json({ success: true, message: "Login successful", user });
+});
 
 app.post("/signup", async (req, res) => {
   try {
-    const { password, email, clientName } = req.body;
+    const {
+      password,
+      email,
+      clientName,
+      contactName,
+      contactNumber,
+    } = req.body;
     let userId = generateShortID(6); // Generate a short ID
 
     // Check if the user ID is already in use
@@ -563,9 +588,11 @@ app.post("/signup", async (req, res) => {
       menusIds: [],
       menus: [],
       createdAt: Date.now().toString(),
-      contactName: "New user",
-      contactNumber: "Enter contact number",
+      contactName,
+      contactNumber,
     };
+
+    console.log("new user created", newUser);
     usersArray.push(newUser);
 
     // Update the 'users' key in Redis
