@@ -207,6 +207,7 @@ function generateDefaultGlobalSettings() {
       description: "",
       caption: "",
       buttonAction: "no action",
+      buttonLink: "",
       buttonText: "Button Text",
       buttonBgColor: "#731574",
       buttonTextColor: "#ffffff",

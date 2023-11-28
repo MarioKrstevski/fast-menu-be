@@ -1,0 +1,116 @@
+Nombre,Descripción,Categoría,Precio,Chico,Mediano,Grande,Surtido Chico,Surtido Grande,Imagen,id,slug
+Spaguetti - Con camarón,,Favoritos 🤩,$110.00,,,,,,https://drive.google.com/file/d/1apmhksRYQfPmGLvhQFWHn_Z7Bcv78pVM/view?usp=sharing,1,1
+Marinero,,Favoritos 🤩,$160.00,,,,,,https://drive.google.com/file/d/1Ckq820WROAxftckC9MR9EvaS7Z3hLU9I/view?usp=sharing,2,2
+Chocolate,,Favoritos 🤩,$30.00,,,,,,https://drive.google.com/file/d/1gCE_-pXJ2AcEylBPzYtnreb04JH_eXHm/view?usp=sharing,3,3
+Pozole,,Favoritos 🤩,,$60.00,,$70.00,$70.00,$80.00,https://drive.google.com/file/d/1PBrFwhU6sOk8_C7ItB7cfl4pvOJLDhFH/view?usp=sharing,4,4
+Chilaques gratinados con pollo o huevo,,Favoritos 🤩,$90.00,,,,,,https://drive.google.com/file/d/1TAM7y7eY8ALlKnZk-GgveIP-eVNIJgkZ/view?usp=sharing,5,5
+Enfrijoladas pollo o panela c/3,,Favoritos 🤩,$60.00,,,,,,https://drive.google.com/file/d/1w4_iAljWXLRjlCTNtzH5v_Uu6kR3wZ3M/view?usp=sharing,6,6
+Enchiladas,,Favoritos 🤩,$18.00,,,,,,https://drive.google.com/file/d/1xJc85eQoWTxmhk-GcZBnO6kzPJiZ4Qjc/view?usp=sharing,7,7
+Panela con albahaca,,Entradas🍴,$70.00,,,,,,,8,8
+Guacamole,,Entradas🍴,$45.00,,,,,,,9,9
+Queso fundido,,Entradas🍴,$80.00,,,,,,,10,10
+Queso fundido con carne,,Entradas🍴,$95.00,,,,,,,11,11
+Carnes frías,,Entradas🍴,$70.00,,,,,,,12,12
+Frijoles,,Entradas🍴,$30.00,,,,,,,13,13
+Nachos,,Entradas🍴,$60.00,,,,,,,14,14
+Nachos con carne,,Entradas🍴,$85.00,,,,,,,15,15
+Orden de papas,,Entradas🍴,$40.00,,,,,,,16,16
+Orden de panela,,Entradas🍴,$35.00,,,,,,,17,17
+Jocoque,,Entradas🍴,$50.00,,,,,,,18,18
+Desayuno Compostelence,"Chilaquiles, guisado y huevo estrellado o revuelto",Desayunos 🍳,$95.00,,,,,,,19,19
+Huevos - Revueltos o estrellados,,Desayunos 🍳,$50.00,,,,,,,20,20
+Huevos - Al gusto,,Desayunos 🍳,$65.00,,,,,,,21,21
+Huevos - Divorciados,,Desayunos 🍳,$70.00,,,,,,,22,22
+Huevos dormidos,"Huevos dentro de una tortilla frita, acompañado con una cama de frijoles y guisado a elegir",Desayunos 🍳,$90.00,,,,,,,23,23
+Huevos - Omelette,"Espicana, champiñon, tocino, jamón, chedar o panela",Desayunos 🍳,$70.00,,,,,,,24,24
+Enfrijoladas pollo o panela c/3,,Desayunos 🍳,$60.00,,,,,,,25,25
+Chilaquiles - Sencillos,,Desayunos 🍳,$65.00,,,,,,,26,26
+Chilaquiles - Con huevo,,Desayunos 🍳,$70.00,,,,,,,27,27
+Chilaquiles - Con pollo,,Desayunos 🍳,$75.00,,,,,,,28,28
+Chilaquiles - Con sirlon,,Desayunos 🍳,$100.00,,,,,,,29,29
+Chilaquiles - Con arrachera,,Desayunos 🍳,$115.00,,,,,,,30,30
+Chilaquiles - Grat. con pollo o huevo,,Desayunos 🍳,$90.00,,,,,,,31,31
+Chilaquiles - 1/2 chilaquiles con huevo,,Desayunos 🍳,$60.00,,,,,,,32,32
+Molletes - Mantequilla,,Desayunos 🍳,$30.00,,,,,,,33,33
+Molletes - Con queso y frijol,,Desayunos 🍳,$60.00,,,,,,,34,34
+"Molletes - Con asada, chorizo o champiñon",,Desayunos 🍳,$70.00,,,,,,,35,35
+Molletes - Con tocino,,Desayunos 🍳,$75.00,,,,,,,36,36
+Hotcakes - Secillo,,Desayunos 🍳,$55.00,,,,,,,37,37
+Hotcakes - Con fruta,,Desayunos 🍳,$75.00,,,,,,,38,38
+Pan Fracés - Sencillo,,Desayunos 🍳,$35.00,,,,,,,39,39
+Pan Fracés - Con tocino,,Desayunos 🍳,$50.00,,,,,,,40,40
+Compostela - Sirlon,"Bisteck asado al carbón acompañado de 2 quesadillas de maíz, arroz y frijoles",Desayunos 🍳,$145.00,,,,,,,41,41
+Compostela - Arrachera,"Bisteck asado al carbón acompañado de 2 quesadillas de maíz, arroz y frijoles",Especiales ❤️,$155.00,,,,,,,42,42
+Camahuer - Sirlon,"Bisteck asado al carbón acompañado de 2 enchiladas a la mexicana,  ensalada fresca, papas fritas, arroz y frijoles",Especiales ❤️,$150.00,,,,,,,43,43
+Camahuer - Arrachera,"Bisteck asado al carbón acompañado de 2 enchiladas a la mexicana,  ensalada fresca, papas fritas, arroz y frijoles",Especiales ❤️,$160.00,,,,,,,44,44
+Spaguetti - Con pollo,,Spaguetti 🍝,$95.00,,,,,,,45,45
+Spaguetti - Champiñon y espinaca,,Spaguetti 🍝,$90.00,,,,,,,46,46
+Ensalada - Pollo con crema,,Ensaladas 🥗,$75.00,,,,,,,47,47
+Ensalada - Con pechuga,,Ensaladas 🥗,$95.00,,,,,,,48,48
+Ensalada - Con aracherra,,Ensaladas 🥗,$115.00,,,,,,,49,49
+Ensalada - Con camarón,,Ensaladas 🥗,$120.00,,,,,,,50,50
+Ensalada - Salmón,,Ensaladas 🥗,$140.00,,,,,,,51,51
+Sopes,,Antojitos mexicanos 🌮,$18.00,,,,,,,52,52
+"Tostadas ",,Antojitos mexicanos 🌮,$20.00,,,,,,,53,53
+Tacos dorados,,Antojitos mexicanos 🌮,$18.00,,,,,,,54,54
+Guisados,,Del día ☀️,$80.00,,,,,,,55,55
+Corrida,"Guisado, consomé o sopa y agua fresca",Del día ☀️,$90.00,,,,,,,56,56
+Caldo de pollo,,Del día ☀️,$65.00,,,,,,,57,57
+Consome,,Del día ☀️,$30.00,,,,,,,58,58
+Sopa pasta,,Del día ☀️,$30.00,,,,,,,59,59
+Milanesa de res o pollo,,Carnes y pollo 🍗,$120.00,,,,,,,60,60
+Arrachera,,Carnes y pollo 🍗,$140.00,,,,,,,61,61
+Sirlon,,Carnes y pollo 🍗,$125.00,,,,,,,62,62
+Chuleta Ahumada,,Carnes y pollo 🍗,$90.00,,,,,,,63,63
+Higado encebollado o a la mexicana,,Carnes y pollo 🍗,$80.00,,,,,,,64,64
+Pollo dorado (1),,Carnes y pollo 🍗,$65.00,,,,,,,65,65
+Pollo dorado (2),,Carnes y pollo 🍗,$85.00,,,,,,,66,66
+Pechuga a la plancha,,Carnes y pollo 🍗,$95.00,,,,,,,67,67
+Tostadas de camarón,,Mariscos 🍤,$30.00,,,,,,,68,68
+Caldo de camarón,,Mariscos 🍤,$115.00,,,,,,,69,69
+Camarones,"Empanizados, a la diabla, al mojo de ajo, rancheros, aguachile, ceviche.",Mariscos 🍤,$145.00,,,,,,,70,70
+Empanadas de camarón c/3,,Mariscos 🍤,$90.00,,,,,,,71,71
+Filete de empanizado,,Pescado 🐟,$120.00,,,,,,,72,72
+Pescado a la plancha,,Pescado 🐟,$100.00,,,,,,,73,73
+Pescado al mojo,,Pescado 🐟,$110.00,,,,,,,74,74
+Salmón a la veracruzana,,Pescado 🐟,$165.00,,,,,,,75,75
+Salmón a la plancha,,Pescado 🐟,$140.00,,,,,,,76,76
+"Enchiladas Suizas ",,Especiales ✨,$90.00,,,,,,,77,77
+Burritos,,Loncheria 🥪,$18.00,,,,,,,78,78
+Pellizcadas antigua,Con mantequilla y queso seco,Loncheria 🥪,$24.00,,,,,,,79,79
+Pellizcada,,Loncheria 🥪,$28.00,,,,,,,80,80
+Pellizcadas con carne o chorizo,,Loncheria 🥪,$34.00,,,,,,,81,81
+Quesadilla comal o dorada,,Loncheria 🥪,$28.00,,,,,,,82,82
+Primo,Quesadilla con carne,Loncheria 🥪,$32.00,,,,,,,83,83
+Volcán,Tortilla dorada a las brazas con queso y carne o chorizo,Loncheria 🥪,$32.00,,,,,,,84,84
+Tacos de asada,,Loncheria 🥪,$24.00,,,,,,,85,85
+Sincronizada,,Loncheria 🥪,$45.00,,,,,,,86,86
+Hamburguesas - Res o pollo,,Loncheria 🥪,$48.00,,,,,,,87,87
+Hamburguesas - Con papas,,Loncheria 🥪,$60.00,,,,,,,88,88
+Hamburguesas - Camarón con papas,,Loncheria 🥪,$70.00,,,,,,,89,89
+Sandwich - Sencillo,,Loncheria 🥪,$30.00,,,,,,,90,90
+Sandwich - Especial,,Loncheria 🥪,$35.00,,,,,,,91,91
+Torta - Sencilla,,Loncheria 🥪,$37.00,,,,,,,92,92
+Torta - Especial,,Loncheria 🥪,$42.00,,,,,,,93,93
+Torta Ahogada,,Loncheria 🥪,$48.00,,,,,,,94,94
+Café o té,,Bebidas ☕️,$25.00,,,,,,,95,95
+Chocolate,,Bebidas ☕️,$30.00,,,,,,,96,96
+Tisana,,Bebidas ☕️,$35.00,,,,,,,97,97
+Agua fresca,,Bebidas ☕️,$24.00,,,,,,,98,98
+1/2 Jarra,,Bebidas ☕️,$65.00,,,,,,,99,99
+Jarra,,Bebidas ☕️,$85.00,,,,,,,100,100
+Limonada y naranjada,,Bebidas ☕️,$38.00,,,,,,,101,101
+Vaso de leche,,Bebidas ☕️,$18.00,,,,,,,102,102
+Jugo verde,,Bebidas ☕️,$35.00,,,,,,,103,103
+Licuado,,Bebidas ☕️,$38.00,,,,,,,104,104
+Limonjito,,Bebidas ☕️,$40.00,,,,,,,105,105
+Refresco,,Bebidas ☕️,$24.00,,,,,,,106,106
+Jugo de naraja,,Bebidas ☕️,,$24.00,$32.00,$38.00,,,,107,107
+Chocomilk,,Bebidas ☕️,,$24.00,$28.00,$32.00,,,,108,108
+Malteada,"Chocolate, Fresa o Vainilla",Bebidas ☕️,,,$40.00,$50.00,,,,109,109
+Malteada de Oreo,,Bebidas ☕️,,,$45.00,$55.00,,,,110,110
+Chocoflan,,Postres 🥧,$38.00,,,,,,,111,111
+Flan,,Postres 🥧,$38.00,,,,,,,112,112
+Helado frito,,Postres 🥧,$45.00,,,,,,,113,113
+Pay,Pregunte por sabores disponibles,Postres 🥧,$38.00,,,,,,,114,114
+Nieve,,Postres 🥧,,$24.00,$40.00,$58.00,,,,115,115
