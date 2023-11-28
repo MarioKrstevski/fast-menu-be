@@ -757,7 +757,7 @@ async function createDemoMenusAndUsers() {
     let menuArray = JSON.parse(existingMenus);
     await redis.set(
       "menus",
-      JSON.stringify([...menuArray, demoMenus])
+      JSON.stringify([...menuArray, ...demoMenus])
     );
   }
 
@@ -782,17 +782,59 @@ async function createDemoMenusAndUsers() {
   demoUsers.push(demoUser1);
   const existingUsers = await redis.get("users");
   if (!existingUsers) {
+    console.log("demoUser1", demoUsers);
     await redis.set("users", JSON.stringify(demoUsers));
   } else {
     let userArray = JSON.parse(existingUsers);
+    console.log("userArray", userArray);
+
+    console.log("demoUser2", [...userArray, ...demoUsers]);
+
     await redis.set(
       "users",
-      JSON.stringify([...userArray, demoUsers])
+      JSON.stringify([...userArray, ...demoUsers])
     );
   }
 
   // Check if a user with the same email already exists
 }
+
+app.get("/populateWithDemo", async (req, res) => {
+  await createDemoMenusAndUsers();
+  console.log("Database seeded with demo");
+
+  return res.status(200).send("Database seeded with demo");
+});
+
+app.get("/wipeDatabase", async (req, res) => {
+  await redis.set("users", JSON.stringify([]));
+  await redis.set("menus", JSON.stringify([]));
+  console.log("Database deleted");
+  return res.status(200).send("Database deleted");
+});
+
+app.get("/getAllExistingMenus", async (req, res) => {
+  const existingMenus = await redis.get("menus");
+  const menuArray = JSON.parse(existingMenus);
+
+  console.log("All existing menus returned");
+
+  return res.status(200).json({
+    allMenus: menuArray,
+  });
+});
+
+app.get("/getAllExistingUsers", async (req, res) => {
+  const existingUsers = await redis.get("users");
+  const userArray = JSON.parse(existingUsers);
+
+  console.log("All existing menus returned");
+
+  return res.status(200).json({
+    allUsers: userArray,
+  });
+});
+
 // createDemoMenusAndUsers();
 app.listen(PORT, () => {
   console.log("Server is running on port " + PORT);
