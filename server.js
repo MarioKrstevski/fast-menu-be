@@ -3,85 +3,100 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import * as dotenv from "dotenv";
 import fs from "fs";
+import streamifier from "streamifier";
 import multer from "multer";
 import csvParser from "csv-parser";
 // import Redis from "redis";
 import Redis from "ioredis";
 import whatsAppClient from "@green-api/whatsapp-api-client";
 import PublicGoogleSheetsParser from "public-google-sheets-parser";
-import { randomUUID } from "crypto";
-import jwt from "jsonwebtoken";
+import { generateMenu } from "./utilities/helperFunctions.js";
 
 // import csv from "csvtojson";
-
 // const redisClient = Redis.createClient();
 // const client = createClient();
 // client.on("error", (err) => console.log("Redis Client Error", err));
 // await client.connect();
 
-const secretKey = "mario";
-function generateAuthToken(userId) {
-  // Create a token with user ID as the payload
-  const token = jwt.sign({ userId }, secretKey, {
-    expiresIn: "1h",
-  }); // Expires in 1 hour
-
-  return token;
-}
-function generateShortID(length) {
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let shortID = "";
-
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    shortID += characters.charAt(randomIndex);
+class Database {
+  constructor() {}
+  async getMenus() {
+    const existingMenus = await redis.get("menus");
+    if (!existingMenus) {
+      return [];
+    } else {
+      return JSON.parse(existingMenus);
+    }
   }
-
-  return shortID;
-}
-function generateRandomCode(length) {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let code = "";
-
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    code += characters.charAt(randomIndex);
+  async getMenu(menuId) {
+    const menus = await this.getMenus();
+    // menu should always exist, since the only way we can
+    // pass the ID is from it already existing to have an ID
+    const menu = menus.find((m) => m.id === menuId);
+    return menu;
   }
+  async saveMenus(menus) {
+    await redis.set("menus", JSON.stringify(menus));
+  }
+  // Some changes were made to this menu, so we need to save it
+  // menu ID should be consistent and never changed so we can use that to track it
 
-  return code;
+  async saveMenu(menu) {
+    const menus = await this.getMenus();
+
+    // replace the existing menu with the updated input menu
+    const updatedMenus = menus.map((m) => {
+      if (m.id !== menu.id) {
+        return m;
+      } else {
+        return menu;
+      }
+    });
+
+    await redis.set("menus", JSON.stringify(updatedMenus));
+  }
+  async getUsers() {
+    const existingUsers = await redis.get("users");
+    if (!existingUsers) {
+      return [];
+    } else {
+      return JSON.parse(existingUsers);
+    }
+  }
+  async saveUsers(users) {
+    await redis.set("users", JSON.stringify(users));
+  }
 }
+
+const db = new Database();
+
 // Usage: Generate a 6-character short ID
 // const redisOptions = {
 //   host: 'your-redis-host',       // Replace with your Redis Labs host
 //   port: 12345,                    // Replace with your Redis Labs port
 //   password: 'your-redis-password', // Replace with your Redis Labs password
 // };
+const defaultItemsSpreadSheetURL =
+  "https://docs.google.com/spreadsheets/d/1i8s74vfPOwOyckvrwzxXBE7j_-0LPJR2rGRgyfwNDWU/edit#gid=0";
+const defaultItems = [];
 
 const redisOptions = {
-  password: "DZqdWxND92zzDU6ZorUUgS2JHifNfP4Y",
-  port: 11535,
   host: "redis-11535.c300.eu-central-1-1.ec2.cloud.redislabs.com",
-  // socket: {
-  // },
+  port: 11535,
+  password: "DZqdWxND92zzDU6ZorUUgS2JHifNfP4Y",
 };
 // By default, it will connect to localhost:6379 if no args are passed
 // const redis = new Redis();
 const redis = new Redis(redisOptions);
-
 const PORT = process.env.PORT || 8000;
-
 const API_TOKEN_INSTANCE =
-  "dc3b3d5c9582485596c37c66bb1fdb324ab3a9ee475e48d99f";
+  "dc3b3d5c9582485596c37c66bb1fDatabase324ab3a9ee475e48d99f";
 const ID_INSTANCE = "7103872930";
-
-const upload = multer({ dest: "uploads/" });
 const whatsappRestAPI = whatsAppClient.restAPI({
   idInstance: ID_INSTANCE,
   apiTokenInstance: API_TOKEN_INSTANCE,
 });
 dotenv.config();
-
 const app = express();
 app.use(cors({ origin: true }));
 app.use(express.json());
@@ -90,32 +105,38 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const defaultItemsSpreadSheetURL =
-  "https://docs.google.com/spreadsheets/d/1i8s74vfPOwOyckvrwzxXBE7j_-0LPJR2rGRgyfwNDWU/edit#gid=0";
-const defaultItems = [];
-
 // accept CSV file to use as a source for data
 app.get("/test", (req, res) => {
-  return res.status(200).send("hello");
+  return res.status(200).send("hello world");
 });
-app.post("/upload", upload.single("csvFile"), (req, res) => {
-  const uploadedFile = req.file;
 
-  if (!uploadedFile) {
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post("/upload", upload.single("csvFile"), async (req, res) => {
+  const uploadedFileBuffer = req.file.buffer;
+  const { menuId } = req.body;
+
+  console.log("Uploading csv file and extracting items");
+  if (!uploadedFileBuffer) {
     return res.status(400).json({ error: "No file uploaded" });
   }
+  const menu = await db.getMenu(menuId);
 
-  const results = [];
-
-  fs.createReadStream(uploadedFile.path)
+  const items = [];
+  streamifier
+    .createReadStream(uploadedFileBuffer)
     .pipe(csvParser())
-    .on("data", (data) => results.push(data))
-    .on("end", () => {
-      // At this point, `results` contains the JSON representation of the CSV data
-      console.log("results", results);
-      // res.json(results);
+    .on("data", (data) => {
+      items.push(data);
+    })
+    .on("end", async (e) => {
+      // maybe we should also mark if it is saved from csv or url
+      menu.items = items;
+      await db.saveMenu(menu);
+      res.status(200).json({
+        items,
+      });
     });
-  res.send("uploadedFile successfuly");
 });
 
 // GLOBAL SETTINGS
@@ -124,16 +145,10 @@ app.get("/globalSettings", async (req, res) => {
 
   // menus should always exists since we clicked edit from the dashboard on
   // an existing menu
-  const existingMenus = await redis.get("menus");
-  const menuArray = JSON.parse(existingMenus);
-
-  const menu = menuArray.find((menu) => {
-    return menu.id === menuId;
-  });
+  const menu = await db.getMenu(menuId);
 
   if (menu) {
     return res.status(200).json({
-      success: true,
       globalSettings: menu.globalSettings,
     });
   } else {
@@ -155,83 +170,10 @@ app.post("/saveGlobalSettings", async (req, res) => {
   return res.status(200).send("Settings updated successfully");
 });
 
-// MENU
-
-function generateDefaultGlobalSettings() {
-  const defaultGlobalSettings = {
-    ordersEnabled: true,
-    whatsappNumberConnected: "Your number here",
-    spreadSheetURL: defaultItemsSpreadSheetURL,
-    websiteName: "Webiste Name",
-    menuName: "New Menu " + generateRandomCode(5),
-    client: "clientName",
-    subdomain: "subdomain-" + generateRandomCode(4).toLowerCase(),
-    logoURL: "",
-    websiteTitle: "",
-    faviconURL: "",
-    isNavbarFixed: false,
-    hero: {
-      isShown: false,
-      title: "Hero Title",
-      titleColor: "#FFFFFF",
-      subheading: "Subheading",
-      subheadingColor: "#FFFFFF",
-      image: "",
-    },
-    menuDescription: "Menu Description",
-    footer: {
-      isFreeMenuTrademarkShown: true,
-      isShown: false,
-      text: "",
-      backgroundColor: "#E3E3E3",
-      textColor: "#000000",
-      isFacebookLinkShown: false,
-      isInstagramLinkShown: false,
-      isTiktokLinkShown: false,
-      isTwitterLinkShown: false,
-      facebookURL: "",
-      instagramURL: "",
-      tiktokURL: "",
-      twitterURL: "",
-    },
-    theme: {
-      headerColor: "#FFFFFF",
-      backgroundColor: "#F0F0F0",
-      font: "",
-    },
-    card: {
-      customFields: "",
-      filterBy: "",
-      image: "",
-      title: "",
-      description: "",
-      caption: "",
-      buttonAction: "no action",
-      buttonLink: "",
-      buttonText: "Button Text",
-      buttonBgColor: "#731574",
-      buttonTextColor: "#ffffff",
-    },
-  };
-
-  return defaultGlobalSettings;
-}
-
-function createNewMenu(client = "") {
-  return {
-    isPro: false,
-    isOnFreeTrial: false,
-    isPublished: false,
-    id: randomUUID(),
-    items: [...defaultItems],
-    globalSettings: { ...generateDefaultGlobalSettings(), client },
-  };
-}
-
 async function generateAndAddNewDefaultMenu(client) {
   const existingMenus = await redis.get("menus");
 
-  const newMenu = createNewMenu(client);
+  const newMenu = generateMenu(client);
 
   if (!existingMenus) {
     await redis.set("menus", JSON.stringify([newMenu]));
@@ -348,7 +290,7 @@ app.get("/getMenus", async (req, res) => {
     menus: menusForClient,
   });
 });
-app.get("/generateNewMenu", async (req, res) => {
+app.get("/generateMenu", async (req, res) => {
   const client = req.query.client;
   await generateAndAddNewDefaultMenu(client);
 
@@ -411,14 +353,6 @@ app.get("/checkClientName", async (req, res) => {
   }
 });
 
-function calculateTimestampForTomorrow() {
-  // Get the current date and time
-  const currentDate = new Date();
-  // Calculate the timestamp for 1 day from now (add 1 day worth of milliseconds)
-  const timestampForTomorrow =
-    currentDate.getTime() + 24 * 60 * 60 * 1000;
-  return timestampForTomorrow;
-}
 app.post("/enableFreeTrialForMenu", async (req, res) => {
   const { menuId } = req.body;
   const existingMenus = await redis.get("menus");
@@ -453,17 +387,63 @@ app.post("/subscribeMenuToPro", async (req, res) => {
 
   return res.status(200).send("Menu upgraded to PRO");
 });
-app.get("/menuItems", async (req, res) => {
-  const newSpreadSheetURL = req.query.newSpreadSheetURL;
-  console.log("Asked for menu items from link", newSpreadSheetURL);
+app.get("/items", async (req, res) => {
+  const { menuId } = req.query;
+  console.log("Getting items for ", menuId);
+  const menu = await db.getMenu(menuId);
+  res.status(200).json({ items: menu.items });
+});
 
+app.post("/syncNewSheets", async (req, res) => {
+  const { newSpreadSheetURL, menuId } = req.body;
+
+  console.log("Syncing with new spreadsheet and getting items");
+  console.log("url:", newSpreadSheetURL);
+  console.log("menuId", menuId);
+
+  // Pull data from Sheets
   const spreadsheetId = extractSpreadsheetId(newSpreadSheetURL);
-
   const parser = new PublicGoogleSheetsParser(spreadsheetId);
 
-  parser.parse().then((menuItems) => {
-    res.json({ menuItems });
+  parser.parse().then(async (items) => {
+    // save Items in Database
+    const menus = await db.getMenus();
+
+    //should always exist since we editing it
+    const menu = menus.find((m) => m.id === menuId);
+    menu.items = items;
+
+    await db.saveMenus(menus);
+
+    // return Items to Client
+    res.status(200).json({ items });
   });
+});
+
+app.post("/syncExistingSheets", async (req, res) => {
+  const { menuId } = req.body;
+
+  console.log("Syncing sheet items for ", menuId);
+
+  // menu should always exist
+  const menu = await db.getMenu(menuId);
+
+  const spreadsheetId = extractSpreadsheetId(
+    menu.globalSettings.spreadSheetURL
+  );
+  const parser = new PublicGoogleSheetsParser(spreadsheetId);
+
+  parser.parse().then(async (items) => {
+    // update in our database
+    menu.items = items;
+    await db.saveMenu(menu);
+
+    res.status(200).json({
+      items,
+    });
+  });
+
+  res.status(200).json({ items: menu.items });
 });
 
 app.get("/menu", async (req, res) => {
@@ -704,7 +684,7 @@ app.post("/placeOrder", (req, res) => {
 async function createDemoMenusAndUsers() {
   const demoMenus = [];
   // published with default Menu 1
-  const demoMenu1 = createNewMenu("demo");
+  const demoMenu1 = generateMenu("demo");
   demoMenu1.isPublished = true;
   demoMenu1.isPro = true;
   demoMenu1.globalSettings.subdomain = "demo1";
@@ -714,7 +694,7 @@ async function createDemoMenusAndUsers() {
     "https://docs.google.com/spreadsheets/d/1i8s74vfPOwOyckvrwzxXBE7j_-0LPJR2rGRgyfwNDWU/edit#gid=0";
 
   // published with default Menu 2
-  const demoMenu2 = createNewMenu("thedemo");
+  const demoMenu2 = generateMenu("thedemo");
   demoMenu2.isPublished = true;
   demoMenu2.globalSettings.subdomain = "demo2";
 
@@ -723,7 +703,7 @@ async function createDemoMenusAndUsers() {
 
   // published with custom playing around shopping list
 
-  const demoMenu3 = createNewMenu("thedemo");
+  const demoMenu3 = generateMenu("thedemo");
   demoMenu3.globalSettings.subdomain = "demo3";
   demoMenu3.isPublished = true;
   demoMenu3.globalSettings.spreadSheetURL =
@@ -731,7 +711,7 @@ async function createDemoMenusAndUsers() {
 
   // published with custom electronics Neptun stuff
 
-  const demoMenu4 = createNewMenu("thedemo");
+  const demoMenu4 = generateMenu("thedemo");
   demoMenu4.isPublished = true;
   demoMenu4.globalSettings.subdomain = "demo4";
 
@@ -739,7 +719,7 @@ async function createDemoMenusAndUsers() {
     "https://docs.google.com/spreadsheets/d/14_N9Lk0APCXrA1lcCrCEeiE-KFkbho125bk8RWuu5T4/edit#gid=0";
 
   // demo 5 is not published
-  const demoMenu5 = createNewMenu("thedemo");
+  const demoMenu5 = generateMenu("thedemo");
   demoMenu5.isPublished = false;
   demoMenu5.globalSettings.subdomain = "demo5";
   demoMenu5.globalSettings.spreadSheetURL =
