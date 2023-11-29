@@ -12,6 +12,7 @@ import whatsAppClient from "@green-api/whatsapp-api-client";
 import PublicGoogleSheetsParser from "public-google-sheets-parser";
 import {
   calculateTimestampForTomorrow,
+  generateAuthToken,
   generateMenu,
 } from "./utilities/helperFunctions.js";
 
