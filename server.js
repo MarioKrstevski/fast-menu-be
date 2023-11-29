@@ -10,7 +10,10 @@ import csvParser from "csv-parser";
 import Redis from "ioredis";
 import whatsAppClient from "@green-api/whatsapp-api-client";
 import PublicGoogleSheetsParser from "public-google-sheets-parser";
-import { generateMenu } from "./utilities/helperFunctions.js";
+import {
+  calculateTimestampForTomorrow,
+  generateMenu,
+} from "./utilities/helperFunctions.js";
 
 // import csv from "csvtojson";
 // const redisClient = Redis.createClient();
@@ -412,6 +415,7 @@ app.post("/syncNewSheets", async (req, res) => {
     //should always exist since we editing it
     const menu = menus.find((m) => m.id === menuId);
     menu.items = items;
+    menu.globalSettings.spreadSheetURL = newSpreadSheetURL;
 
     await db.saveMenus(menus);
 
