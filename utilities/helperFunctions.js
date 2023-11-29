@@ -45,7 +45,7 @@ export function generateRandomCode(length) {
 
 export function generateDefaultGlobalSettings() {
   const defaultGlobalSettings = {
-    ordersEnabled: true,
+    ordersEnabled: false,
     whatsappNumberConnected: "Your number here",
     spreadSheetURL: defaultItemsSpreadSheetURL,
     websiteName: "Webiste Name",

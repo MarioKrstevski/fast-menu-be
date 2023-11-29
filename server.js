@@ -92,13 +92,7 @@ const redisOptions = {
 // const redis = new Redis();
 const redis = new Redis(redisOptions);
 const PORT = process.env.PORT || 8000;
-const API_TOKEN_INSTANCE =
-  "dc3b3d5c9582485596c37c66bb1fDatabase324ab3a9ee475e48d99f";
-const ID_INSTANCE = "7103872930";
-const whatsappRestAPI = whatsAppClient.restAPI({
-  idInstance: ID_INSTANCE,
-  apiTokenInstance: API_TOKEN_INSTANCE,
-});
+
 dotenv.config();
 const app = express();
 app.use(cors({ origin: true }));
@@ -672,17 +666,26 @@ function extractSpreadsheetId(link) {
 // returns the menu for a client ( one client can has more than one menus )
 
 // sends a message to a phone numbers on whatsapp
-app.post("/placeOrder", (req, res) => {
-  const { message, number } = req.body;
-  console.log("message ", message);
 
-  whatsappRestAPI.message
-    .sendMessage(`${number}@c.us`, null, message)
-    .then((data) => {
-      console.log(data);
-      console.log("success");
-      res.json("Order placed");
-    });
+const API_TOKEN_INSTANCE =
+  "dc3b3d5c9582485596c37c66bb1fDatabase324ab3a9ee475e48d99f";
+const ID_INSTANCE = "7103872930";
+
+const whatsappRestAPI = whatsAppClient.restAPI({
+  idInstance: ID_INSTANCE,
+  apiTokenInstance: API_TOKEN_INSTANCE,
+});
+
+app.post("/placeOrder", (req, res) => {
+  let { message, number } = req.body;
+  console.log("message logz", message, number);
+
+  // whatsappRestAPI.message
+  //   .sendMessage(`${number}@c.us`, null, message)
+  //   .then((data) => {
+  //     console.log("success");
+  //     res.json("Order placed");
+  //   });
 });
 
 async function createDemoMenusAndUsers() {
