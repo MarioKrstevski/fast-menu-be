@@ -1,6 +1,6 @@
 import fs from "fs";
 import Papa from "papaparse";
-
+// SAMO PROMENA DALI RABOTI
 function arrayToCsv(dataArray, filePath) {
   if (dataArray.length === 0) {
     console.error("Array is empty. Cannot generate CSV.");
