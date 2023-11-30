@@ -1,6 +1,17 @@
 import jwt from "jsonwebtoken";
 import { randomUUID } from "crypto";
 
+export function giveIDsToItems(itemsArray) {
+  const itemsWithIDs = itemsArray.map((item) => {
+    return {
+      ...item,
+      _uid: generateRandomCode(6),
+      _slug: generateShortID(6),
+    };
+  });
+
+  return itemsWithIDs;
+}
 export function generateAuthToken(userId) {
   const secretKey = "mario";
   // Create a token with user ID as the payload
@@ -103,11 +114,12 @@ export function generateDefaultGlobalSettings() {
 
   return defaultGlobalSettings;
 }
-const defaultItems = [
+let defaultItems = [
   { Name: "John", Age: 30, City: "New York" },
   { Name: "Jane", Age: 25, City: "San Francisco" },
   // Add more objects as needed
 ];
+defaultItems = giveIDsToItems(defaultItems);
 export function generateMenu(client = "") {
   return {
     isPro: false,
