@@ -447,6 +447,7 @@ app.post("/syncExistingSheets", async (req, res) => {
 });
 
 app.get("/menu", async (req, res) => {
+  return res.status(404);
   const menuId = req.query.menuId;
   const subdomain = req.query.subdomain;
 
