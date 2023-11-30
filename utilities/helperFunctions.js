@@ -42,8 +42,8 @@ export function generateRandomCode(length) {
 
   return code;
 }
-const defaultItemsSpreadSheetURL =
-  "https://docs.google.com/spreadsheets/d/1i8s74vfPOwOyckvrwzxXBE7j_-0LPJR2rGRgyfwNDWU/edit#gid=0";
+const defaultItemsSpreadSheetURL = "not connected";
+
 export function generateDefaultGlobalSettings() {
   const defaultGlobalSettings = {
     ordersEnabled: false,
@@ -103,14 +103,18 @@ export function generateDefaultGlobalSettings() {
 
   return defaultGlobalSettings;
 }
-
+const defaultItems = [
+  { Name: "John", Age: 30, City: "New York" },
+  { Name: "Jane", Age: 25, City: "San Francisco" },
+  // Add more objects as needed
+];
 export function generateMenu(client = "") {
   return {
     isPro: false,
     isOnFreeTrial: false,
     isPublished: false,
     id: randomUUID(),
-    items: [],
+    items: [...defaultItems],
     globalSettings: { ...generateDefaultGlobalSettings(), client },
   };
 }

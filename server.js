@@ -128,9 +128,11 @@ app.post("/upload", upload.single("csvFile"), async (req, res) => {
     .on("end", async (e) => {
       // maybe we should also mark if it is saved from csv or url
       menu.items = items;
+      menu.globalSettings.spreadSheetURL = "items from csv file";
       await db.saveMenu(menu);
       res.status(200).json({
         items,
+        globalSettings: menu.globalSettings,
       });
     });
 });
