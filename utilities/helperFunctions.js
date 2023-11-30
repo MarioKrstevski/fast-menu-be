@@ -42,7 +42,8 @@ export function generateRandomCode(length) {
 
   return code;
 }
-
+const defaultItemsSpreadSheetURL =
+  "https://docs.google.com/spreadsheets/d/1i8s74vfPOwOyckvrwzxXBE7j_-0LPJR2rGRgyfwNDWU/edit#gid=0";
 export function generateDefaultGlobalSettings() {
   const defaultGlobalSettings = {
     ordersEnabled: false,
@@ -109,7 +110,7 @@ export function generateMenu(client = "") {
     isOnFreeTrial: false,
     isPublished: false,
     id: randomUUID(),
-    items: [...defaultItems],
+    items: [],
     globalSettings: { ...generateDefaultGlobalSettings(), client },
   };
 }

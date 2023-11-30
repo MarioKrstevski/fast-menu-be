@@ -81,9 +81,6 @@ const db = new Database();
 //   port: 12345,                    // Replace with your Redis Labs port
 //   password: 'your-redis-password', // Replace with your Redis Labs password
 // };
-const defaultItemsSpreadSheetURL =
-  "https://docs.google.com/spreadsheets/d/1i8s74vfPOwOyckvrwzxXBE7j_-0LPJR2rGRgyfwNDWU/edit#gid=0";
-const defaultItems = [];
 
 const redisOptions = {
   host: "redis-11535.c300.eu-central-1-1.ec2.cloud.redislabs.com",
@@ -289,7 +286,7 @@ app.get("/getMenus", async (req, res) => {
     menus: menusForClient,
   });
 });
-app.get("/generateMenu", async (req, res) => {
+app.get("/generateNewMenu", async (req, res) => {
   const client = req.query.client;
   await generateAndAddNewDefaultMenu(client);
 
