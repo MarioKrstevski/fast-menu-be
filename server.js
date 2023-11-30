@@ -15,6 +15,7 @@ import {
   generateAuthToken,
   generateMenu,
   generateShortID,
+  giveIDsToItems,
 } from "./utilities/helperFunctions.js";
 
 // import csv from "csvtojson";
@@ -118,7 +119,7 @@ app.post("/upload", upload.single("csvFile"), async (req, res) => {
   }
   const menu = await db.getMenu(menuId);
 
-  const items = [];
+  let items = [];
   streamifier
     .createReadStream(uploadedFileBuffer)
     .pipe(csvParser())
@@ -127,6 +128,7 @@ app.post("/upload", upload.single("csvFile"), async (req, res) => {
     })
     .on("end", async (e) => {
       // maybe we should also mark if it is saved from csv or url
+      items = giveIDsToItems(items);
       menu.items = items;
       menu.globalSettings.spreadSheetURL = "items from csv file";
       await db.saveMenu(menu);
@@ -409,6 +411,7 @@ app.post("/syncNewSheets", async (req, res) => {
 
     //should always exist since we editing it
     const menu = menus.find((m) => m.id === menuId);
+    items = giveIDsToItems(items);
     menu.items = items;
     menu.globalSettings.spreadSheetURL = newSpreadSheetURL;
 
@@ -434,6 +437,8 @@ app.post("/syncExistingSheets", async (req, res) => {
 
   parser.parse().then(async (items) => {
     // update in our database
+    items = giveIDsToItems(items);
+
     menu.items = items;
     await db.saveMenu(menu);
 
@@ -484,6 +489,8 @@ app.get("/menu", async (req, res) => {
   const parser = new PublicGoogleSheetsParser(menuSpreadsheetId);
 
   parser.parse().then((menuItemsArray) => {
+    menuItemsArray = giveIDsToItems(menuItemsArray);
+
     res.json({
       menuItems: menuItemsArray,
       globalSettings: menu.globalSettings,
