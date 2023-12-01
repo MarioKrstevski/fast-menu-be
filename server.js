@@ -442,12 +442,12 @@ app.post("/syncExistingSheets", async (req, res) => {
     menu.items = items;
     await db.saveMenu(menu);
 
-    res.status(200).json({
+    return res.status(200).json({
       items,
     });
   });
 
-  res.status(200).json({ items: menu.items });
+  // res.status(200).json({ items: menu.items });
 });
 
 app.get("/menu", async (req, res) => {
@@ -482,20 +482,32 @@ app.get("/menu", async (req, res) => {
   if (!menu) {
     return res.status(404).send("Menu doesnt eixst");
   }
-  // console.log("menu", menu);
-  const menuSpreadsheetId = extractSpreadsheetId(
-    menu.globalSettings.spreadSheetURL
-  );
-  const parser = new PublicGoogleSheetsParser(menuSpreadsheetId);
 
-  parser.parse().then((menuItemsArray) => {
-    menuItemsArray = giveIDsToItems(menuItemsArray);
+  console.log("menu", menu);
 
-    res.json({
-      menuItems: menuItemsArray,
-      globalSettings: menu.globalSettings,
-    });
+  // Uncomment code if you want the updates to allways pull from the sheets, we dont want this
+  // we want people to hit resync sheets
+
+  // HERE
+
+  return res.status(200).json({
+    menuItems: menu.items,
+    globalSettings: menu.globalSettings,
   });
+
+  // const menuSpreadsheetId = extractSpreadsheetId(
+  //   menu.globalSettings.spreadSheetURL
+  // );
+  // const parser = new PublicGoogleSheetsParser(menuSpreadsheetId);
+
+  // parser.parse().then((menuItemsArray) => {
+  //   menuItemsArray = giveIDsToItems(menuItemsArray);
+
+  //   res.json({
+  //     menuItems: menuItemsArray,
+  //     globalSettings: menu.globalSettings,
+  //   });
+  // });
 });
 
 // AUTH
