@@ -723,10 +723,12 @@ async function createDemoMenusAndUsers() {
   // published with default Menu 2
   const demoMenu2 = generateMenu("thedemo");
   demoMenu2.isPublished = true;
-  demoMenu2.globalSettings.subdomain = "demo2";
+  demoMenu2.isPro = true;
+  demoMenu2.globalSettings.subdomain = "fastmenu";
+  demoMenu2.globalSettings.websiteName = "Fast Menu Websites";
 
   demoMenu2.globalSettings.spreadSheetURL =
-    "https://docs.google.com/spreadsheets/d/14_N9Lk0APCXrA1lcCrCEeiE-KFkbho125bk8RWuu5T4/edit#gid=0";
+    "https://docs.google.com/spreadsheets/d/1C5IgGgBct10Q-yFW2V8L2ZVI7LfEyyuj2ruposFRjbQ/edit#gid=0";
 
   // published with custom playing around shopping list
 
