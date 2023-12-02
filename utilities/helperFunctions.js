@@ -101,9 +101,9 @@ export function generateDefaultGlobalSettings() {
       customFields: "",
       filterBy: "",
       image: "",
-      title: "",
-      description: "",
-      caption: "",
+      title: "Name",
+      description: "Description",
+      caption: "Price",
       buttonAction: "no action",
       buttonLink: "",
       buttonText: "Button Text",
@@ -115,8 +115,12 @@ export function generateDefaultGlobalSettings() {
   return defaultGlobalSettings;
 }
 let defaultItems = [
-  { Name: "John", Age: 30, City: "New York" },
-  { Name: "Jane", Age: 25, City: "San Francisco" },
+  { Name: "Coffee", Price: 10, Description: "Black coffee" },
+  {
+    Name: "Fried Eggs",
+    Price: 25,
+    Description: "2 eggs, bacon and pepper",
+  },
   // Add more objects as needed
 ];
 defaultItems = giveIDsToItems(defaultItems);
