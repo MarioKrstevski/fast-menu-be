@@ -539,6 +539,7 @@ app.post("/login", async (req, res) => {
       delete user.password;
       return res.status(200).json({
         success: true,
+        isAdmin: true,
         message: "Login successful",
         user,
         token: generateAuthToken(user.id),
