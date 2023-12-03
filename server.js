@@ -703,7 +703,7 @@ function extractSpreadsheetId(link) {
 // sends a message to a phone numbers on whatsapp
 
 const API_TOKEN_INSTANCE =
-  "dc3b3d5c9582485596c37c66bb1fDatabase324ab3a9ee475e48d99f";
+  "dc3b3d5c9582485596c37c66bb1fdb324ab3a9ee475e48d99f";
 const ID_INSTANCE = "7103872930";
 
 const whatsappRestAPI = whatsAppClient.restAPI({
@@ -711,16 +711,22 @@ const whatsappRestAPI = whatsAppClient.restAPI({
   apiTokenInstance: API_TOKEN_INSTANCE,
 });
 
+// The number should be copied from the greenapi exactly as it is in that format
 app.post("/placeOrder", (req, res) => {
   let { message, number } = req.body;
-  console.log("message logz", message, number);
+  console.log("Sending order to ", number);
 
-  // whatsappRestAPI.message
-  //   .sendMessage(`${number}@c.us`, null, message)
-  //   .then((data) => {
-  //     console.log("success");
-  //     res.json("Order placed");
-  //   });
+  whatsappRestAPI.message
+    .sendMessage(number + "@c.us", null, message)
+    // .sendMessage(`${38977766669}@c.us`, null, "Test")
+    .then((data) => {
+      // console.log("success", data);
+      return res.status(200).json({ message: "Order placed" });
+    })
+    .catch((err) => {
+      // console.log("Order error", err);
+      return res.status(403).json({ message: "Order failed" });
+    });
 });
 
 async function createDemoMenusAndUsers() {
